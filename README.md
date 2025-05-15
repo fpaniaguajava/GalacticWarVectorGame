@@ -10,4 +10,6 @@ El prototipo únicamente permite mover el puntero con el ratón, pero no está i
 Construcción con Maven: mvn clean package
 Ejecución con Maven: mvn exec:java
 
+galacticwarvectorgame.png
 
+![Captura de la ejecución del prototipo](https://fpaniaguajava.github.io/galacticwarvectorgame.png)
