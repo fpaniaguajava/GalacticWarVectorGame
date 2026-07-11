@@ -16,6 +16,14 @@ public class VG2DLine {
     public VG2DPoint p2;
     public Color color;
 
+    // Campos para animación de explosión
+    public double ox = 0; // offset x
+    public double oy = 0; // offset y
+    public double angle = 0; // ángulo de rotación
+    public double vx = 0; // velocidad de desplazamiento x
+    public double vy = 0; // velocidad de desplazamiento y
+    public double vAngle = 0; // velocidad angular
+
     public VG2DLine(double x1, double y1, double x2, double y2, Color color){
         this.p1 = new VG2DPoint(x1, y1);
         this.p2 = new VG2DPoint(x2, y2);

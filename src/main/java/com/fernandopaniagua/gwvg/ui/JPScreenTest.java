@@ -34,6 +34,12 @@ public class JPScreenTest extends javax.swing.JPanel {
     VG2DObject deathStar;
     private int cursorXPos = 0, cursorYPos = 0;//Posicion del cursor
     private int xmove, ymove;//Diferenciales a mover las estrellas
+    
+    // Estado del arma láser
+    private boolean laserActive = false;
+    private int laserDuration = 0;
+    private int laserTargetX = 0;
+    private int laserTargetY = 0;
 
     /**
      * Creates new form JPScreenTest
@@ -84,6 +90,34 @@ public class JPScreenTest extends javax.swing.JPanel {
             }
         });
 
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    laserActive = true;
+                    laserDuration = 10;
+                    laserTargetX = e.getX();
+                    laserTargetY = e.getY();
+
+                    // Buscar el Tie Fighter más cercano (escala s más grande) que contenga el punto del click
+                    TF hitTF = null;
+                    for (VG2DObject objeto2D : alObjetos) {
+                        if (objeto2D instanceof TF) {
+                            TF tf = (TF) objeto2D;
+                            if (!tf.isExploding() && tf.containsPoint(laserTargetX, laserTargetY)) {
+                                if (hitTF == null || tf.getScale() > hitTF.getScale()) {
+                                    hitTF = tf;
+                                }
+                            }
+                        }
+                    }
+                    if (hitTF != null) {
+                        hitTF.startExplosion();
+                    }
+                }
+            }
+        });
+
         alLineas.add(new VG2DLine(135 * JFMain.SCREEN_WIDTH / 320, 240 * JFMain.SCREEN_HEIGHT / 240, 150 * JFMain.SCREEN_WIDTH / 320, 225 * JFMain.SCREEN_HEIGHT / 240, Color.red));
         alLineas.add(new VG2DLine(150 * JFMain.SCREEN_WIDTH / 320, 225 * JFMain.SCREEN_HEIGHT / 240, 150 * JFMain.SCREEN_WIDTH / 320, 230 * JFMain.SCREEN_HEIGHT / 240, Color.red));
         alLineas.add(new VG2DLine(150 * JFMain.SCREEN_WIDTH / 320, 225 * JFMain.SCREEN_HEIGHT / 240, 165 * JFMain.SCREEN_WIDTH / 320, 225 * JFMain.SCREEN_HEIGHT / 240, Color.red));
@@ -123,11 +157,15 @@ public class JPScreenTest extends javax.swing.JPanel {
         //DIBUJA EL PANEL
         this.drawAVGLines(g2d);
         //ESCALA LOS TF
-        VG2DObject otf;
         for (VG2DObject objeto2D : alObjetos) {
             if (objeto2D instanceof TF) {
-                objeto2D.scale(0.0001);
-                ((TF) objeto2D).move();
+                TF tf = (TF) objeto2D;
+                if (tf.isExploding()) {
+                    tf.updateExplosion();
+                } else {
+                    objeto2D.scale(0.0001);
+                    tf.move();
+                }
             }
         }
         //DIBUJA LAS ESTRELLAS
@@ -142,7 +180,27 @@ public class JPScreenTest extends javax.swing.JPanel {
         //ESCALA LA ESTRELLA DE LA MUERTE
         deathStar.scale(0.0001);
         
-
+        // DIBUJA EL LÁSER SI ESTÁ ACTIVO
+        if (laserActive) {
+            g2d.setColor(Color.red);
+            g2d.setStroke(new java.awt.BasicStroke(3f));
+            g2d.drawLine(0, JFMain.SCREEN_HEIGHT, laserTargetX, laserTargetY);
+            g2d.drawLine(JFMain.SCREEN_WIDTH, JFMain.SCREEN_HEIGHT, laserTargetX, laserTargetY);
+            
+            // Núcleo blanco para efecto de brillo vector
+            g2d.setColor(Color.white);
+            g2d.setStroke(new java.awt.BasicStroke(1f));
+            g2d.drawLine(0, JFMain.SCREEN_HEIGHT, laserTargetX, laserTargetY);
+            g2d.drawLine(JFMain.SCREEN_WIDTH, JFMain.SCREEN_HEIGHT, laserTargetX, laserTargetY);
+            
+            // Restaurar trazo
+            g2d.setStroke(new java.awt.BasicStroke(1f));
+            
+            laserDuration--;
+            if (laserDuration <= 0) {
+                laserActive = false;
+            }
+        }
     }
 
     /**
