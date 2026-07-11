@@ -8,6 +8,8 @@ package com.fernandopaniagua.gwvg.ui;
 import com.fernandopaniagua.gwvg.model.PunteroLaser;
 import com.fernandopaniagua.gwvg.model.Star;
 import com.fernandopaniagua.gwvg.model.TF;
+import com.fernandopaniagua.gwvg.model.EmpireShip;
+import com.fernandopaniagua.gwvg.model.StarDestroyer;
 import com.fernandopaniagua.gwvg.model.VG2DLine;
 import com.fernandopaniagua.gwvg.model.VG2DObject;
 import java.awt.Color;
@@ -62,6 +64,9 @@ public class JPScreenTest extends javax.swing.JPanel {
             for (int i = 0; i < NUM_TF; i++) {
                 alObjetos.add(new TF("vector/tiefighter.dat"));
             }
+            for (int i = 0; i < 3; i++) {
+                alObjetos.add(new StarDestroyer("vector/stardestroyer.dat"));
+            }
             
             
         } catch (IOException ex) {
@@ -99,20 +104,20 @@ public class JPScreenTest extends javax.swing.JPanel {
                     laserTargetX = e.getX();
                     laserTargetY = e.getY();
 
-                    // Buscar el Tie Fighter más cercano (escala s más grande) que contenga el punto del click
-                    TF hitTF = null;
+                    // Buscar la nave del imperio más cercana (escala s más grande) que contenga el punto del click
+                    EmpireShip hitShip = null;
                     for (VG2DObject objeto2D : alObjetos) {
-                        if (objeto2D instanceof TF) {
-                            TF tf = (TF) objeto2D;
-                            if (!tf.isExploding() && tf.containsPoint(laserTargetX, laserTargetY)) {
-                                if (hitTF == null || tf.getScale() > hitTF.getScale()) {
-                                    hitTF = tf;
+                        if (objeto2D instanceof EmpireShip) {
+                            EmpireShip ship = (EmpireShip) objeto2D;
+                            if (!ship.isExploding() && ship.containsPoint(laserTargetX, laserTargetY)) {
+                                if (hitShip == null || ship.getScale() > hitShip.getScale()) {
+                                    hitShip = ship;
                                 }
                             }
                         }
                     }
-                    if (hitTF != null) {
-                        hitTF.startExplosion();
+                    if (hitShip != null) {
+                        hitShip.startExplosion();
                     }
                 }
             }
@@ -156,15 +161,16 @@ public class JPScreenTest extends javax.swing.JPanel {
         g2d.fillRect(0, 0, JFMain.SCREEN_WIDTH, JFMain.SCREEN_HEIGHT);
         //DIBUJA EL PANEL
         this.drawAVGLines(g2d);
-        //ESCALA LOS TF
+        //ESCALA LOS TF Y DESTRUCTORES ESTELARES
         for (VG2DObject objeto2D : alObjetos) {
-            if (objeto2D instanceof TF) {
-                TF tf = (TF) objeto2D;
-                if (tf.isExploding()) {
-                    tf.updateExplosion();
+            if (objeto2D instanceof EmpireShip) {
+                EmpireShip ship = (EmpireShip) objeto2D;
+                if (ship.isExploding()) {
+                    ship.updateExplosion();
                 } else {
-                    objeto2D.scale(0.0001);
-                    tf.move();
+                    double scaleFactor = (ship instanceof StarDestroyer) ? 0.00005 : 0.0001;
+                    objeto2D.scale(scaleFactor);
+                    ship.move();
                 }
             }
         }
